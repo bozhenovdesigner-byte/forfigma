@@ -3,25 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>360° Панорама производства</title>
+    <title>360° Панорама</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
     <style>
-        :root {
-            --text: #ffffff;
-            --text-muted: rgba(255,255,255,0.65);
-        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: auto; }
         body {
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: #000;
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
         }
 
         #hero {
             position: relative;
-            height: 350vh;
+            height: 450vh; /* Увеличил высоту для комфортного скролла */
         }
         #panorama {
             position: fixed;
@@ -30,7 +24,7 @@
             z-index: 1;
         }
 
-        /* Hero overlay - чистый, без попапа */
+        /* UI Overlay */
         #ui-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -38,21 +32,23 @@
             z-index: 10;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.8s ease;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s;
         }
         #ui-overlay.visible {
             opacity: 1;
+            visibility: visible;
             pointer-events: auto;
         }
 
-        /* Мягкий градиент только снизу для читаемости текста */
-        .bottom-gradient {
+        /* Градиент снизу для читаемости */
+        .gradient {
             position: absolute;
             bottom: 0; left: 0;
-            width: 100%; height: 55vh;
+            width: 100%; height: 60vh;
             background: linear-gradient(to top, 
-                rgba(0,0,0,0.7) 0%, 
-                rgba(0,0,0,0.3) 40%, 
+                rgba(0,0,0,0.85) 0%, 
+                rgba(0,0,0,0.4) 50%, 
                 transparent 100%);
             pointer-events: none;
         }
@@ -61,8 +57,8 @@
             position: absolute;
             bottom: 0; left: 0;
             width: 100%;
-            padding: 0 8% 12vh;
-            color: var(--text);
+            padding: 0 10% 15vh;
+            color: #fff;
             max-width: 1400px;
         }
         .badge {
@@ -70,63 +66,58 @@
             font-size: 0.75rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-            padding-left: 2px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1.2rem;
         }
         h1 {
-            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
             font-weight: 700;
             line-height: 1.1;
             margin-bottom: 1rem;
-            max-width: 700px;
-            letter-spacing: -0.01em;
+            max-width: 750px;
         }
         .subtitle {
-            font-size: clamp(1rem, 1.8vw, 1.2rem);
+            font-size: clamp(1rem, 2vw, 1.25rem);
             line-height: 1.5;
-            color: var(--text-muted);
-            max-width: 520px;
+            color: rgba(255,255,255,0.7);
+            max-width: 550px;
             margin-bottom: 2.5rem;
         }
         .cta-group {
             display: flex;
-            gap: 0.75rem;
+            gap: 1rem;
             flex-wrap: wrap;
         }
         .btn {
-            padding: 0.9rem 2rem;
+            padding: 1rem 2.2rem;
             border-radius: 8px;
             font-weight: 500;
             text-decoration: none;
             font-size: 0.95rem;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 0.01em;
+            display: inline-block;
         }
         .btn-primary {
             background: #fff;
-            color: #111;
+            color: #000;
         }
         .btn-primary:hover {
             background: #f0f0f0;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
         .btn-ghost {
             background: transparent;
             color: #fff;
-            border: 1px solid rgba(255,255,255,0.25);
+            border: 1px solid rgba(255,255,255,0.3);
         }
         .btn-ghost:hover {
-            border-color: rgba(255,255,255,0.5);
-            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.08);
         }
 
-        /* Scroll hint */
-        .scroll-hint {
+        /* Scroll indicator */
+        .scroll-indicator {
             position: fixed;
             bottom: 2.5rem;
             left: 50%;
@@ -134,23 +125,26 @@
             z-index: 20;
             color: rgba(255,255,255,0.5);
             font-size: 0.8rem;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            animation: float 2s ease-in-out infinite;
+            gap: 0.6rem;
+            animation: bounce 2s infinite;
             pointer-events: none;
-            transition: opacity 0.4s, visibility 0.4s;
+            transition: opacity 0.4s;
         }
-        .scroll-hint.hidden { opacity: 0; visibility: hidden; }
-        @keyframes float {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-6px); }
+        .scroll-indicator.hidden { opacity: 0; }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
         }
-        .scroll-hint .line {
-            width: 1px; height: 32px;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent);
+        .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
         }
 
         /* Block 2 */
@@ -161,19 +155,9 @@
             min-height: 100vh;
             padding: 8rem 2rem;
         }
-        .container { max-width: 720px; margin: 0 auto; }
-        h2 {
-            font-size: 1.8rem;
-            color: #111;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-        }
-        p {
-            color: #555;
-            line-height: 1.75;
-            margin-bottom: 1.5rem;
-            font-size: 1.05rem;
-        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h2 { font-size: 2rem; color: #111; margin-bottom: 1.5rem; font-weight: 600; }
+        p { color: #555; line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.1rem; }
         .card {
             margin: 3rem 0;
             padding: 2.5rem;
@@ -184,14 +168,12 @@
         .spacer { height: 100vh; }
 
         @media (max-width: 768px) {
-            #hero { height: 300vh; }
-            .content { padding: 0 6% 10vh; }
-            h1 { font-size: 1.8rem; }
-            .subtitle { font-size: 0.95rem; }
-            .btn { width: 100%; text-align: center; }
-            .cta-group { gap: 0.5rem; }
-            .scroll-hint { display: none; }
-            .bottom-gradient { height: 60vh; }
+            #hero { height: 400vh; }
+            .content { padding: 0 6% 12vh; }
+            h1 { font-size: 1.9rem; }
+            .subtitle { font-size: 1rem; }
+            .btn { width: 100%; }
+            .scroll-indicator { display: none; }
         }
 
         .pnlm-controls-container, .pnlm-load-box { display: none !important; }
@@ -202,13 +184,13 @@
     <section id="hero">
         <div id="panorama"></div>
         
-        <div class="scroll-hint" id="scrollHint">
-            <span>scroll</span>
-            <div class="line"></div>
+        <div class="scroll-indicator" id="scrollIndicator">
+            <span>Листайте вниз</span>
+            <div class="scroll-line"></div>
         </div>
         
         <div id="ui-overlay">
-            <div class="bottom-gradient"></div>
+            <div class="gradient"></div>
             <div class="content">
                 <span class="badge">Промышленные решения</span>
                 <h1>Вентиляционные системы нового поколения</h1>
@@ -224,16 +206,16 @@
     <main id="block2">
         <div class="container">
             <h2>О производстве</h2>
-            <p>Мы разрабатываем и устанавливаем промышленные вентиляционные системы. Завод оснащен современным оборудованием для производства компонентов любой сложности.</p>
+            <p>Мы разрабатываем и устанавливаем промышленные вентиляционные системы. Завод оснащен современным оборудованием.</p>
             
             <div class="card">
                 <h2>Технологии</h2>
-                <p>Передовые материалы и технологии для максимальной эффективности систем вентиляции и кондиционирования промышленных объектов.</p>
+                <p>Передовые материалы и технологии для максимальной эффективности систем вентиляции.</p>
             </div>
             
             <div class="card">
                 <h2>Проекты</h2>
-                <p>Более 500 реализованных проектов — от небольших помещений до крупных промышленных комплексов по всей стране.</p>
+                <p>Более 500 реализованных проектов по всей стране.</p>
             </div>
             
             <div class="spacer"></div>
@@ -257,92 +239,99 @@
             hfov: 100
         });
 
-        // === Механика скролла ===
-        // 0% — 35%: прокрутка 0° → 180°
-        // 35%: fade-in оффера
-        // 35% — 100%: прокрутка 180° → 270° (даём время прочитать)
-        // 100%: hero отпускает, block2 заезжает
-        const PHASES = {
-            rotationPhase1: 0.35,  // до этого момента крутим до 180°
-            uiTrigger: 0.35,       // в этот момент появляется UI
-            rotationPhase2: 1.0    // до конца крутим до 270°
+        // === КОНФИГУРАЦИЯ ===
+        const CONFIG = {
+            yawAtUI: 180,        // На каком угле появляется UI
+            yawEnd: 270,         // Конечный угол (180 + 90 на чтение)
+            smoothing: 0.1       // Плавность (меньше = плавнее)
         };
-        const YAW_TOTAL = 270; // 180 + 90
 
         let currentYaw = 0;
         let targetYaw = 0;
         let uiShown = false;
-        let isMobile = window.matchMedia('(pointer: coarse)').matches;
 
         const els = {
             hero: document.getElementById('hero'),
             ui: document.getElementById('ui-overlay'),
-            hint: document.getElementById('scrollHint')
+            indicator: document.getElementById('scrollIndicator')
         };
 
-        // Плавная анимация (lerp)
+        // Анимационный цикл
         function animate() {
-            currentYaw += (targetYaw - currentYaw) * 0.06;
+            // Плавное приближение к целевому углу
+            const delta = targetYaw - currentYaw;
+            currentYaw += delta * CONFIG.smoothing;
             viewer.setYaw(currentYaw);
             requestAnimationFrame(animate);
         }
         animate();
 
-        function handleScroll() {
-            const rect = els.hero.getBoundingClientRect();
-            const scrollable = els.hero.offsetHeight - window.innerHeight;
-            let progress = -rect.top / scrollable;
+        // Обработка скролла
+        function onScroll() {
+            const heroRect = els.hero.getBoundingClientRect();
+            const heroHeight = els.hero.offsetHeight;
+            const windowHeight = window.innerHeight;
+            
+            // Прогресс скролла в hero (0 to 1)
+            let progress = -heroRect.top / (heroHeight - windowHeight);
             progress = Math.max(0, Math.min(1, progress));
 
-            // Фаза 1: 0 → 180°
-            if (progress <= PHASES.rotationPhase1) {
-                let local = progress / PHASES.rotationPhase1;
-                targetYaw = local * 180;
-            }
-            // Фаза 2: 180° → 270°
-            else {
-                let local = (progress - PHASES.rotationPhase1) / (PHASES.rotationPhase2 - PHASES.rotationPhase1);
-                targetYaw = 180 + local * 90;
+            // === ЛОГИКА ===
+            // 0% - 50% скролла: 0° → 180°
+            // 50%: UI появляется
+            // 50% - 100%: 180° → 270° (чтение)
+            
+            if (progress < 0.5) {
+                // Первая половина: крутим до 180°
+                const localProgress = progress / 0.5; // 0 to 1
+                targetYaw = localProgress * CONFIG.yawAtUI;
+            } else {
+                // Вторая половина: 180° → 270°
+                const localProgress = (progress - 0.5) / 0.5; // 0 to 1
+                targetYaw = CONFIG.yawAtUI + (localProgress * 90);
             }
 
-            // Появление UI
-            if (progress >= PHASES.uiTrigger && !uiShown) {
+            // Показ UI ТОЛЬКО после 180°
+            if (currentYaw >= CONFIG.yawAtUI - 5 && !uiShown) { // -5 для небольшого допуска
                 els.ui.classList.add('visible');
-                els.hint.classList.add('hidden');
+                els.indicator.classList.add('hidden');
                 uiShown = true;
-            } else if (progress < PHASES.uiTrigger && uiShown) {
+            } else if (currentYaw < CONFIG.yawAtUI - 10 && uiShown) {
                 els.ui.classList.remove('visible');
-                els.hint.classList.remove('hidden');
+                els.indicator.classList.remove('hidden');
                 uiShown = false;
             }
         }
 
+        // Оптимизация скролла
         let ticking = false;
         window.addEventListener('scroll', () => {
             if (!ticking) {
-                requestAnimationFrame(() => {
-                    handleScroll();
+                window.requestAnimationFrame(() => {
+                    onScroll();
                     ticking = false;
                 });
                 ticking = true;
             }
         }, { passive: true });
 
-        if (isMobile) {
-            viewer.setDraggable(true);
-            els.hint.style.display = 'none';
-        }
-
+        // Кнопки
         document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('click', e => {
+            btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                document.getElementById('block2').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('block2').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
             });
         });
 
+        // Ресайз
         window.addEventListener('resize', () => {
-            if (!ticking) requestAnimationFrame(handleScroll);
+            if (!ticking) onScroll();
         });
+
+        // Инициализация
+        onScroll();
     </script>
 </body>
 </html>
