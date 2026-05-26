@@ -6,200 +6,183 @@
     <title>360° Панорама производства</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #3b82f6;
+            --text-dark: #0f172a;
+            --text-light: #f8fafc;
         }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
             overflow-x: hidden;
         }
-        
-        /* Hero секция */
+
+        /* HERO */
         #hero {
             position: relative;
-            height: 400vh; /* Достаточно высоты для прокрутки */
+            height: 400vh;
         }
-        
-        /* Контейнер панорамы */
         #panorama {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
+            top: 0; left: 0;
+            width: 100%; height: 100vh;
             z-index: 1;
         }
-        
-        /* UI оверлей */
+
+        /* HERO OFFER OVERLAY */
         #ui-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 0; left: 0;
+            width: 100%; height: 100vh;
             z-index: 10;
             pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 5% 10vh;
             opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.8s ease, visibility 0.8s;
-            background: rgba(0, 0, 0, 0.2);
+            transform: translateY(30px);
+            transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        
         #ui-overlay.visible {
             opacity: 1;
-            visibility: visible;
-        }
-        
-        .content-box {
-            background: rgba(255, 255, 255, 0.98);
-            padding: 3rem 2.5rem;
-            border-radius: 16px;
-            text-align: center;
-            max-width: 540px;
-            width: 90%;
-            transform: translateY(60px) scale(0.9);
-            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(0);
             pointer-events: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        
-        #ui-overlay.visible .content-box {
-            transform: translateY(0) scale(1);
+
+        .hero-offer {
+            position: relative;
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
         }
-        
-        h1 {
-            font-size: 2.25rem;
-            margin-bottom: 1rem;
-            color: #1a1a2e;
-            line-height: 1.2;
+        .gradient-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, 
+                rgba(0,0,0,0.85) 0%, 
+                rgba(0,0,0,0.5) 30%, 
+                rgba(0,0,0,0.1) 60%, 
+                transparent 100%);
+            pointer-events: none;
+            z-index: 1;
         }
-        
-        .subtitle {
-            font-size: 1.125rem;
-            color: #4a5568;
-            margin-bottom: 2rem;
-            line-height: 1.6;
+
+        .content {
+            position: relative;
+            z-index: 2;
+            color: var(--text-light);
+            padding-bottom: 2rem;
         }
-        
-        .cta-button {
+        .badge {
             display: inline-block;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        h1 {
+            font-size: clamp(2.2rem, 5.5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.05;
+            margin-bottom: 1rem;
+            max-width: 900px;
+            letter-spacing: -0.02em;
+        }
+        .subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.35rem);
+            line-height: 1.6;
+            opacity: 0.85;
+            max-width: 680px;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .btn {
             padding: 1rem 2.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
-            font-size: 1rem;
-            transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        .btn-primary {
+            background: #fff;
+            color: var(--text-dark);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
-        
-        /* Индикатор скролла */
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,255,255,0.25); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(6px);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+
+        /* SCROLL HINT */
         .scroll-hint {
             position: fixed;
-            bottom: 2rem;
+            bottom: 2.5rem;
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
-            color: white;
-            font-size: 0.875rem;
-            opacity: 0.8;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            color: #fff;
+            font-size: 0.85rem;
+            opacity: 0.7;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 0.5rem;
-            animation: bounce 2s infinite;
+            animation: pulse 2.5s infinite;
             pointer-events: none;
+            transition: opacity 0.5s, visibility 0.5s;
         }
-        
-        .scroll-hint.hidden {
-            opacity: 0;
-            transition: opacity 0.5s;
+        .scroll-hint.hidden { opacity: 0; visibility: hidden; }
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-8px); }
         }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-            40% { transform: translateX(-50%) translateY(-12px); }
-            60% { transform: translateX(-50%) translateY(-6px); }
-        }
-        
-        .arrow {
-            width: 24px;
-            height: 24px;
-            border-right: 3px solid white;
-            border-bottom: 3px solid white;
-            transform: rotate(45deg);
-        }
-        
-        /* Основной контент */
+        .arrow { width: 20px; height: 20px; border-right: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(45deg); }
+
+        /* MAIN CONTENT */
         #main-content {
             position: relative;
             z-index: 5;
-            background: white;
+            background: #fff;
             min-height: 100vh;
-            padding: 5rem 2rem;
+            padding: 6rem 2rem;
         }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        h2 {
-            font-size: 2rem;
-            color: #1a1a2e;
-            margin-bottom: 1.5rem;
-        }
-        
-        p {
-            color: #4a5568;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-            font-size: 1.125rem;
-        }
-        
-        .section {
-            margin: 4rem 0;
-            padding: 3rem;
-            background: #f7fafc;
-            border-radius: 12px;
-        }
-        
-        /* Мобильная адаптация */
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 4rem 0; padding: 3rem; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; }
+        h2 { font-size: 2rem; color: var(--text-dark); margin-bottom: 1rem; }
+        p { color: #475569; line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.1rem; }
+        .spacer { height: 100vh; }
+
+        /* MOBILE */
         @media (max-width: 768px) {
-            #hero {
-                height: 300vh;
-            }
-            
-            h1 {
-                font-size: 1.75rem;
-            }
-            
-            .content-box {
-                padding: 2rem 1.5rem;
-            }
-            
-            .scroll-hint {
-                display: none; /* На мобильных скролл и так очевиден */
-            }
+            #hero { height: 300vh; }
+            #ui-overlay { padding: 0 1.5rem 8vh; align-items: center; }
+            .gradient-overlay { height: 80vh; }
+            h1 { font-size: 2rem; }
+            .scroll-hint { display: none; }
+            .btn { width: 100%; padding: 1.1rem; }
         }
-        
-        /* Скрываем контролы Pannellum */
-        .pnlm-controls-container {
-            display: none !important;
-        }
+
+        /* Hide Pannellum UI */
+        .pnlm-controls-container, .pnlm-load-box { display: none !important; }
     </style>
 </head>
 <body>
@@ -213,15 +196,17 @@
         </div>
         
         <div id="ui-overlay">
-            <div class="content-box">
-                <h1>Вентиляционные системы нового поколения</h1>
-                <p class="subtitle">
-                    Современные промышленные решения на крыше нашего производственного комплекса. 
-                    Эффективность, надежность, инновации.
-                </p>
-                <a href="#main-content" class="cta-button" id="ctaButton">
-                    Узнать больше
-                </a>
+            <div class="hero-offer">
+                <div class="gradient-overlay"></div>
+                <div class="content">
+                    <span class="badge">Промышленные решения</span>
+                    <h1>Вентиляционные системы нового поколения</h1>
+                    <p class="subtitle">Современное производство на крыше нашего комплекса. Эффективность, надежность, инновации в каждом компоненте.</p>
+                    <div class="cta-group">
+                        <a href="#main-content" class="btn btn-primary">Узнать больше</a>
+                        <a href="#contact" class="btn btn-secondary">Запросить расчет</a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -229,110 +214,87 @@
     <main id="main-content">
         <div class="container">
             <h2>О нашем производстве</h2>
-            <p>
-                Мы специализируемся на разработке и установке промышленных вентиляционных систем. 
-                Наш завод оснащен современным оборудованием для производства компонентов любой сложности.
-            </p>
+            <p>Мы специализируемся на разработке и установке промышленных вентиляционных систем. Наш завод оснащен современным оборудованием для производства компонентов любой сложности.</p>
             
             <div class="section">
                 <h3>Технологии</h3>
-                <p>
-                    Используем передовые материалы и технологии для обеспечения максимальной 
-                    эффективности систем вентиляции и кондиционирования.
-                </p>
+                <p>Используем передовые материалы и технологии для обеспечения максимальной эффективности систем вентиляции и кондиционирования.</p>
             </div>
             
             <div class="section">
                 <h3>Проекты</h3>
-                <p>
-                    Реализовали более 500 проектов различной сложности — от небольших офисных 
-                    помещений до крупных промышленных объектов.
-                </p>
+                <p>Реализовали более 500 проектов различной сложности — от небольших офисных помещений до крупных промышленных объектов.</p>
             </div>
             
-            <div class="section">
-                <h3>Контакты</h3>
-                <p>
-                    Готовы обсудить ваш проект? Свяжитесь с нами для консультации и расчета 
-                    стоимости оборудования.
-                </p>
-            </div>
-            
-            <div style="height: 100vh;"></div> <!-- Для демонстрации скролла -->
+            <div class="spacer"></div>
         </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
     <script>
-        // Инициализация Pannellum
         const viewer = pannellum.viewer('panorama', {
-            "type": "equirectangular",
-            "panorama": "panorama.jpg", // Замените на свой файл или URL
-            "autoLoad": true,
-            "showControls": false,
-            "draggable": false,
-            "scrollZoom": false,
-            "keyboardZoom": false,
-            "mouseZoom": false,
-            "doubleClickZoom": false,
-            "yaw": 0,
-            "pitch": 0,
-            "hfov": 100
+            type: 'equirectangular',
+            panorama: 'panorama.jpg', // Замените на свой файл/URL
+            autoLoad: true,
+            showControls: false,
+            draggable: false,
+            scrollZoom: false,
+            keyboardZoom: false,
+            mouseZoom: false,
+            doubleClickZoom: false,
+            yaw: 0,
+            pitch: 0,
+            hfov: 100
         });
 
-        // Конфигурация
         const config = {
-            totalRotation: 360,        // Полный оборот
-            uiTriggerProgress: 0.65,   // На 65% скролла показываем UI
-            heroHeightMultiplier: 4    // hero = 400vh (4 экрана)
+            totalRotation: 360,
+            uiTrigger: 0.65,
+            smoothing: 0.07 // Меньше = плавнее, но медленнее реакция
         };
 
+        let currentYaw = 0;
+        let targetYaw = 0;
         let uiShown = false;
         let isMobile = window.matchMedia('(pointer: coarse)').matches;
 
-        const elements = {
+        const els = {
             hero: document.getElementById('hero'),
             ui: document.getElementById('ui-overlay'),
-            scrollHint: document.getElementById('scrollHint'),
-            ctaButton: document.getElementById('ctaButton')
+            hint: document.getElementById('scrollHint')
         };
 
-        // Основная функция обновления
+        // Плавная анимация вращения
+        function animate() {
+            // Линейная интерполяция (lerp)
+            currentYaw += (targetYaw - currentYaw) * config.smoothing;
+            viewer.setYaw(currentYaw);
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Обработка скролла
         function handleScroll() {
-            const heroRect = elements.hero.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
-            
-            // Прогресс скролла в hero секции (0 to 1)
-            let progress = -heroRect.top / (elements.hero.offsetHeight - windowHeight);
+            const rect = els.hero.getBoundingClientRect();
+            const height = els.hero.offsetHeight - window.innerHeight;
+            let progress = -rect.top / height;
             progress = Math.max(0, Math.min(1, progress));
-            
-            // Вращение панорамы
-            const yaw = progress * config.totalRotation;
-            viewer.setYaw(yaw);
-            
-            // Показ/скрытие UI
-            if (progress >= config.uiTriggerProgress && !uiShown) {
-                showUI();
-            } else if (progress < config.uiTriggerProgress && uiShown) {
-                hideUI();
+
+            targetYaw = progress * config.totalRotation;
+
+            if (progress >= config.uiTrigger && !uiShown) {
+                els.ui.classList.add('visible');
+                els.hint.classList.add('hidden');
+                uiShown = true;
+            } else if (progress < config.uiTrigger && uiShown) {
+                els.ui.classList.remove('visible');
+                els.hint.classList.remove('hidden');
+                uiShown = false;
             }
         }
 
-        function showUI() {
-            elements.ui.classList.add('visible');
-            elements.scrollHint.classList.add('hidden');
-            uiShown = true;
-        }
-
-        function hideUI() {
-            elements.ui.classList.remove('visible');
-            elements.scrollHint.classList.remove('hidden');
-            uiShown = false;
-        }
-
-        // Оптимизация скролла
         let ticking = false;
-        function requestUpdate() {
+        window.addEventListener('scroll', () => {
             if (!ticking) {
                 requestAnimationFrame(() => {
                     handleScroll();
@@ -340,39 +302,30 @@
                 });
                 ticking = true;
             }
-        }
+        }, { passive: true });
 
-        // Для мобильных — упрощенная версия (только тач-свайпы)
+        // Мобильная адаптация
         if (isMobile) {
             viewer.setDraggable(true);
-            elements.scrollHint.style.display = 'none';
-            
-            // Показываем UI после первого взаимодействия
-            viewer.on('mousedown', function() {
-                if (!uiShown) {
-                    setTimeout(showUI, 500);
-                }
+            viewer.on('mousedown', () => {
+                if (!uiShown) setTimeout(() => {
+                    els.ui.classList.add('visible');
+                    uiShown = true;
+                }, 400);
             });
-        } else {
-            window.addEventListener('scroll', requestUpdate, { passive: true });
         }
 
         // Плавный скролл к контенту
-        elements.ctaButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('main-content').scrollIntoView({ 
-                behavior: 'smooth' 
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                document.getElementById('main-content').scrollIntoView({ behavior: 'smooth' });
             });
         });
 
-        // Инициализация
-        handleScroll();
-
-        // Обработка изменения размера
-        let resizeTimeout;
+        // Ресайз
         window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(handleScroll, 250);
+            if (!ticking) requestAnimationFrame(handleScroll);
         });
     </script>
 </body>
