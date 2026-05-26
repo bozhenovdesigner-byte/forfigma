@@ -15,7 +15,7 @@
 
         #hero {
             position: relative;
-            height: 400vh;
+            height: 300vh;
         }
         #panorama {
             position: fixed;
@@ -34,22 +34,26 @@
             opacity: 0;
             visibility: hidden;
             transform: translateY(0);
-            transition: opacity 0.5s ease, visibility 0.5s, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.5s ease, visibility 0s linear 0.5s, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         #ui-overlay.visible {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
+            transition: opacity 0.5s ease, visibility 0s, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        #ui-overlay.scrolling-up {
-            transform: translateY(-100vh);
+        #ui-overlay.fading-out {
             opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+            visibility: visible;
+            transition: opacity 0.6s ease, visibility 0s, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .gradient {
             position: absolute;
             bottom: 0; left: 0;
-            width: 100%; height: 60vh;
+            width: 100%; height: 45vh;
             background: linear-gradient(to top, 
                 rgba(0,0,0,0.85) 0%, 
                 rgba(0,0,0,0.4) 50%, 
@@ -156,6 +160,10 @@
             z-index: 5;
             background: #ffffff;
             min-height: 100vh;
+            margin-top: -10vh;
+            padding-top: 10vh;
+        }
+        .block2-content {
             padding: 8rem 2rem;
         }
         .container { max-width: 800px; margin: 0 auto; }
@@ -171,12 +179,13 @@
         .spacer { height: 100vh; }
 
         @media (max-width: 768px) {
-            #hero { height: 350vh; }
+            #hero { height: 260vh; }
             .content { padding: 0 6% 12vh; }
             h1 { font-size: 1.9rem; }
             .subtitle { font-size: 1rem; }
             .btn { width: 100%; }
             .scroll-indicator { display: none; }
+            .block2-content { padding: 6rem 1.5rem; }
         }
 
         .pnlm-controls-container, .pnlm-load-box { display: none !important; }
@@ -207,21 +216,23 @@
     </section>
 
     <main id="block2">
-        <div class="container">
-            <h2>О производстве</h2>
-            <p>Мы разрабатываем и устанавливаем промышленные вентиляционные системы. Завод оснащен современным оборудованием.</p>
-            
-            <div class="card">
-                <h2>Технологии</h2>
-                <p>Передовые материалы и технологии для максимальной эффективности систем вентиляции.</p>
+        <div class="block2-content">
+            <div class="container">
+                <h2>О производстве</h2>
+                <p>Мы разрабатываем и устанавливаем промышленные вентиляционные системы. Завод оснащен современным оборудованием.</p>
+                
+                <div class="card">
+                    <h2>Технологии</h2>
+                    <p>Передовые материалы и технологии для максимальной эффективности систем вентиляции.</p>
+                </div>
+                
+                <div class="card">
+                    <h2>Проекты</h2>
+                    <p>Более 500 реализованных проектов по всей стране.</p>
+                </div>
+                
+                <div class="spacer"></div>
             </div>
-            
-            <div class="card">
-                <h2>Проекты</h2>
-                <p>Более 500 реализованных проектов по всей стране.</p>
-            </div>
-            
-            <div class="spacer"></div>
         </div>
     </main>
 
@@ -244,14 +255,17 @@
 
         // === КОНФИГУРАЦИЯ ===
         const CONFIG = {
-            uiShowProgress: 0.40,    // 40% — показываем UI (раньше было 50%)
-            uiHideProgress: 0.92,    // 92% — UI уезжает (синхронно с блоком 2)
+            uiShowProgress: 0.30,    // 30% — показываем UI
+            uiFadeStart: 0.92,       // 92% — начинаем плавное угасание UI
             totalYaw: 270
         };
 
+        const FIRST_YAW = 180;
+        const SECOND_YAW = CONFIG.totalYaw - FIRST_YAW;
+
         let currentYaw = 0;
         let targetYaw = 0;
-        let uiState = 'hidden'; // 'hidden', 'visible', 'scrolling-up'
+        let uiState = 'hidden'; // 'hidden', 'visible', 'fading-out'
 
         const els = {
             hero: document.getElementById('hero'),
@@ -260,18 +274,20 @@
             block2: document.getElementById('block2')
         };
 
-        // Обновление позиции панорамы
-        function updatePanorama() {
+        // === Единый rAF-цикл (не множится при скролле) ===
+        function panoramaLoop() {
             const delta = targetYaw - currentYaw;
             if (Math.abs(delta) > 0.05) {
                 currentYaw += delta * 0.1;
                 viewer.setYaw(currentYaw);
-                requestAnimationFrame(updatePanorama);
-            } else {
-                currentYaw = targetYaw;
+            } else if (Math.abs(delta) > 0.001) {
+                // дотягиваем до точного значения быстрее
+                currentYaw += delta * 0.3;
                 viewer.setYaw(currentYaw);
             }
+            requestAnimationFrame(panoramaLoop);
         }
+        requestAnimationFrame(panoramaLoop);
 
         // Обработка скролла
         function onScroll() {
@@ -282,42 +298,36 @@
             let progress = -heroRect.top / (heroHeight - windowHeight);
             progress = Math.max(0, Math.min(1, progress));
 
-            // === Расчет угла поворота ===
+            // === Расчет угла поворота (используем CONFIG.totalYaw) ===
             if (progress < CONFIG.uiShowProgress) {
-                // 0% - 40%: 0° → 180°
-                const localProgress = progress / CONFIG.uiShowProgress;
-                targetYaw = localProgress * 180;
+                const p = progress / CONFIG.uiShowProgress;
+                targetYaw = p * FIRST_YAW;
             } else {
-                // 40% - 100%: 180° → 270°
-                const localProgress = (progress - CONFIG.uiShowProgress) / (1 - CONFIG.uiShowProgress);
-                targetYaw = 180 + (localProgress * 90);
+                const p = (progress - CONFIG.uiShowProgress) / (1 - CONFIG.uiShowProgress);
+                targetYaw = FIRST_YAW + p * SECOND_YAW;
             }
 
-            // === Управление UI (синхронизировано с блоком 2) ===
-            if (progress >= CONFIG.uiShowProgress && progress < CONFIG.uiHideProgress) {
-                // Показываем UI
+            // === Управление UI ===
+            if (progress < CONFIG.uiShowProgress) {
+                if (uiState !== 'hidden') {
+                    els.ui.classList.remove('visible', 'fading-out');
+                    els.indicator.classList.remove('hidden');
+                    uiState = 'hidden';
+                }
+            } else if (progress < CONFIG.uiFadeStart) {
                 if (uiState !== 'visible') {
-                    els.ui.classList.remove('scrolling-up');
+                    els.ui.classList.remove('fading-out');
                     els.ui.classList.add('visible');
                     els.indicator.classList.add('hidden');
                     uiState = 'visible';
                 }
-            } else if (progress >= CONFIG.uiHideProgress) {
-                // UI уезжает наверх (когда блок 2 уже виден)
-                if (uiState !== 'scrolling-up') {
-                    els.ui.classList.add('scrolling-up');
-                    uiState = 'scrolling-up';
-                }
             } else {
-                // UI скрыт (начало скролла)
-                if (uiState !== 'hidden') {
-                    els.ui.classList.remove('visible', 'scrolling-up');
-                    els.indicator.classList.remove('hidden');
-                    uiState = 'hidden';
+                if (uiState !== 'fading-out') {
+                    els.ui.classList.remove('visible');
+                    els.ui.classList.add('fading-out');
+                    uiState = 'fading-out';
                 }
             }
-
-            updatePanorama();
         }
 
         // Оптимизация скролла
@@ -338,9 +348,16 @@
             els.block2.scrollIntoView({ behavior: 'smooth' });
         });
 
-        // Ресайз
+        // Ресайз с корректным флагом
+        let resizeTicking = false;
         window.addEventListener('resize', () => {
-            if (!ticking) onScroll();
+            if (!resizeTicking) {
+                window.requestAnimationFrame(() => {
+                    onScroll();
+                    resizeTicking = false;
+                });
+                resizeTicking = true;
+            }
         });
 
         // Инициализация
