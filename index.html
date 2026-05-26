@@ -1,1282 +1,379 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Монтаж вентиляции | Миторра</title>
-  <style>
-    :root {
-      --accent: #2d97dc;
-      --black: #0a0a0a;
-      --white: #ffffff;
-      --gray-bg: #f5f5f5;
-      --text: #333333;
-      --text-light: #888888;
-      --border: #e5e5e5;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      color: var(--text);
-      background: var(--white);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    img { max-width: 100%; display: block; }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
-
-    @media (max-width: 768px) {
-      .container { padding: 0 1.5rem; }
-    }
-
-    /* Header */
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      z-index: 1000;
-      transition: all 0.3s;
-    }
-
-    header.scrolled {
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-    }
-
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 70px;
-      position: relative;
-    }
-
-    .logo {
-      font-weight: 800;
-      font-size: 1.3rem;
-      color: var(--black);
-      letter-spacing: -0.5px;
-      text-decoration: none;
-      z-index: 1001;
-    }
-
-    .logo span { color: var(--accent); }
-
-    .nav-desktop {
-      display: flex;
-      gap: 2.5rem;
-      list-style: none;
-    }
-
-    .nav-desktop a {
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 500;
-      font-size: 0.9rem;
-      transition: color 0.3s;
-      position: relative;
-    }
-
-    .nav-desktop a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--accent);
-      transition: width 0.3s;
-    }
-
-    .nav-desktop a:hover { color: var(--accent); }
-    .nav-desktop a:hover::after { width: 100%; }
-
-    /* Phone / CTA animation */
-    .phone-wrap {
-      position: relative;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      min-width: 180px;
-    }
-
-    .phone-text {
-      font-weight: 700;
-      color: var(--black);
-      text-decoration: none;
-      font-size: 0.95rem;
-      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      white-space: nowrap;
-      position: absolute;
-      right: 0;
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .phone-btn {
-      position: absolute;
-      right: 0;
-      opacity: 0;
-      transform: scale(0.8) translateX(20px);
-      pointer-events: none;
-      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      white-space: nowrap;
-      background: var(--accent);
-      color: var(--white);
-      text-decoration: none;
-      padding: 0.6rem 1.4rem;
-      border-radius: 4px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      border: none;
-      cursor: pointer;
-    }
-
-    header.scrolled .phone-text {
-      opacity: 0;
-      transform: scale(0.8) translateX(-20px);
-      pointer-events: none;
-    }
-
-    header.scrolled .phone-btn {
-      opacity: 1;
-      transform: scale(1) translateX(0);
-      pointer-events: all;
-    }
-
-    .phone-btn:hover { background: #2580bd; }
-
-    /* Burger */
-    .burger {
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      gap: 5px;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-      z-index: 1001;
-      background: none;
-      border: none;
-    }
-
-    .burger span {
-      display: block;
-      width: 100%;
-      height: 2px;
-      background: var(--black);
-      transition: all 0.3s;
-      border-radius: 2px;
-    }
-
-    .burger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .burger.active span:nth-child(2) { opacity: 0; }
-    .burger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-    /* Mobile Menu */
-    .mobile-menu {
-      position: fixed;
-      top: 70px;
-      left: 0;
-      width: 100%;
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
-      padding: 2rem;
-      transform: translateY(-100%);
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      z-index: 999;
-    }
-
-    .mobile-menu.open {
-      transform: translateY(0);
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .mobile-menu ul {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .mobile-menu a {
-      text-decoration: none;
-      color: var(--black);
-      font-weight: 600;
-      font-size: 1.1rem;
-      display: block;
-    }
-
-    .mobile-menu .mobile-phone {
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .mobile-menu .mobile-phone a {
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 1.2rem;
-    }
-
-    .mobile-menu .mobile-phone button {
-      background: var(--accent);
-      color: var(--white);
-      border: none;
-      padding: 0.9rem;
-      border-radius: 4px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-      .nav-desktop { display: none; }
-      .burger { display: flex; }
-      .phone-wrap { display: none; }
-    }
-
-    /* ===== HERO ===== */
-    .hero {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: var(--white);
-      overflow: hidden;
-      margin-top: 0;
-      /* Fallback background — пока видео не загрузилось */
-      background: url('bg.jpg') center/cover no-repeat;
-    }
-
-    .hero-video {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      min-width: 100%;
-      min-height: 100%;
-      width: auto;
-      height: auto;
-      transform: translate(-50%, -50%);
-      object-fit: cover;
-      z-index: 1; /* поверх фона .hero */
-    }
-
-    .hero-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to bottom,
-        rgba(10,10,10,0.7) 0%,
-        rgba(10,10,10,0.5) 40%,
-        rgba(10,10,10,0.8) 100%
-      );
-      z-index: 2;
-    }
-
-    .hero::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at 50% 50%, rgba(45,151,220,0.12) 0%, transparent 60%);
-      z-index: 2;
-      pointer-events: none;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 3;
-      max-width: 900px;
-      padding: 2rem;
-    }
-
-    .hero h1 {
-      font-size: clamp(2.2rem, 5vw, 4rem);
-      font-weight: 800;
-      line-height: 1.05;
-      margin-bottom: 1.5rem;
-      text-shadow: 0 2px 20px rgba(0,0,0,0.5);
-    }
-
-    .hero p {
-      font-size: 1.2rem;
-      color: rgba(255,255,255,0.85);
-      max-width: 560px;
-      margin: 0 auto 2.5rem;
-      text-shadow: 0 1px 10px rgba(0,0,0,0.5);
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 1.1rem 2.8rem;
-      background: var(--accent);
-      color: var(--white);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 1rem;
-      border-radius: 4px;
-      transition: all 0.3s;
-      border: none;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(45,151,220,0.4);
-      background: #2580bd;
-    }
-
-    .scroll-indicator {
-      position: absolute;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      opacity: 0.7;
-      animation: bounce 2s infinite;
-    }
-
-    .scroll-indicator span {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.8);
-    }
-
-    .scroll-indicator svg {
-      width: 24px;
-      height: 24px;
-      stroke: var(--white);
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-      40% { transform: translateX(-50%) translateY(-10px); }
-      60% { transform: translateX(-50%) translateY(-5px); }
-    }
-
-    /* Mobile: выключаем видео, остаётся только фоновая картинка */
-    @media (max-width: 768px) {
-      .hero-video { display: none; }
-      .hero { min-height: 90vh; }
-      .hero h1 { font-size: 1.9rem; }
-      .hero p { font-size: 1rem; }
-    }
-
-    /* Sections */
-    .section-full {
-      width: 100%;
-      padding: 6rem 0;
-    }
-
-    @media (max-width: 768px) {
-      .section-full { padding: 4rem 0; }
-    }
-
-    .section-title {
-      font-size: clamp(1.5rem, 3vw, 2.2rem);
-      font-weight: 800;
-      color: var(--black);
-      margin-bottom: 3.5rem;
-      text-align: center;
-      letter-spacing: -0.5px;
-    }
-
-    /* Features */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .feature-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      padding: 2.2rem;
-      border-radius: 6px;
-      transition: all 0.3s;
-    }
-
-    .feature-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-6px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.06);
-    }
-
-    .feature-card h3 {
-      font-size: 1.15rem;
-      margin-bottom: 0.8rem;
-      color: var(--black);
-      font-weight: 700;
-    }
-
-    .feature-card p {
-      color: var(--text-light);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-
-    /* Process */
-    .process-section {
-      background: var(--gray-bg);
-      width: 100%;
-    }
-
-    .process-infographic {
-      position: relative;
-      padding-top: 1rem;
-    }
-
-    .process-line {
-      position: absolute;
-      top: 40px;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--border);
-      z-index: 0;
-    }
-
-    .process-line-fill {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      background: var(--accent);
-      width: 0%;
-      transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .process-steps {
-      display: flex;
-      justify-content: space-between;
-      position: relative;
-      z-index: 1;
-    }
-
-    .step {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      width: 15%;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .step.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .step-circle {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: var(--white);
-      border: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--text-light);
-      margin-bottom: 1.5rem;
-      transition: all 0.4s;
-      position: relative;
-      z-index: 2;
-    }
-
-    .step:hover .step-circle,
-    .step.visible .step-circle {
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: 0 0 0 6px rgba(45,151,220,0.1);
-    }
-
-    .step h3 {
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-      color: var(--black);
-      font-weight: 700;
-    }
-
-    .step p {
-      color: var(--text-light);
-      font-size: 0.85rem;
-      line-height: 1.5;
-    }
-
-    @media (max-width: 768px) {
-      .process-line {
-        top: 0;
-        left: 24px;
-        width: 2px;
-        height: 100%;
-      }
-      .process-line-fill {
-        width: 100%;
-        height: 0%;
-        transition: height 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      }
-      .process-steps {
-        flex-direction: column;
-        gap: 2.5rem;
-      }
-      .step {
-        flex-direction: row;
-        align-items: flex-start;
-        text-align: left;
-        width: 100%;
-        gap: 1.5rem;
-      }
-      .step-circle {
-        width: 50px;
-        height: 50px;
-        font-size: 1.1rem;
-        flex-shrink: 0;
-        margin-bottom: 0;
-      }
-    }
-
-    /* Portfolio Carousel */
-    .portfolio-section {
-      background: var(--white);
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .carousel-wrapper {
-      position: relative;
-      width: 100%;
-    }
-
-    .carousel-track {
-      display: flex;
-      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      will-change: transform;
-    }
-
-    .carousel-slide {
-      min-width: 33.333%;
-      padding: 0 0.75rem;
-    }
-
-    @media (max-width: 1024px) {
-      .carousel-slide { min-width: 50%; }
-    }
-
-    @media (max-width: 768px) {
-      .carousel-slide { min-width: 100%; padding: 0 0.5rem; }
-    }
-
-    .portfolio-item {
-      position: relative;
-      overflow: hidden;
-      border-radius: 8px;
-      aspect-ratio: 4/3;
-      background: var(--gray-bg);
-      cursor: grab;
-    }
-
-    .portfolio-item:active { cursor: grabbing; }
-
-    .portfolio-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      filter: grayscale(20%);
-    }
-
-    .portfolio-item:hover img {
-      transform: scale(1.08);
-      filter: grayscale(0%);
-    }
-
-    .portfolio-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.3) 50%, transparent 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 1.8rem;
-      opacity: 0;
-      transition: opacity 0.4s;
-    }
-
-    .portfolio-item:hover .portfolio-overlay { opacity: 1; }
-
-    .portfolio-overlay h3 {
-      color: var(--white);
-      font-size: 1.1rem;
-      margin-bottom: 0.4rem;
-      font-weight: 700;
-      transform: translateY(10px);
-      transition: transform 0.4s;
-    }
-
-    .portfolio-overlay p {
-      color: rgba(255,255,255,0.75);
-      font-size: 0.8rem;
-      line-height: 1.4;
-      transform: translateY(10px);
-      transition: transform 0.4s 0.05s;
-    }
-
-    .portfolio-item:hover .portfolio-overlay h3,
-    .portfolio-item:hover .portfolio-overlay p {
-      transform: translateY(0);
-    }
-
-    .portfolio-meta {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.7rem;
-      flex-wrap: wrap;
-      transform: translateY(10px);
-      transition: transform 0.4s 0.1s;
-    }
-
-    .portfolio-item:hover .portfolio-meta { transform: translateY(0); }
-
-    .tag {
-      font-size: 0.7rem;
-      color: var(--accent);
-      border: 1px solid rgba(45,151,220,0.5);
-      padding: 0.15rem 0.5rem;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background: rgba(45,151,220,0.1);
-    }
-
-    /* Carousel Controls */
-    .carousel-controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1.5rem;
-      margin-top: 2.5rem;
-    }
-
-    .carousel-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--white);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s;
-      color: var(--black);
-    }
-
-    .carousel-btn:hover {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: var(--white);
-      transform: scale(1.1);
-    }
-
-    .carousel-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-      transform: none;
-      background: var(--white);
-      border-color: var(--border);
-      color: var(--black);
-    }
-
-    .carousel-dots {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-      padding: 0;
-    }
-
-    .dot.active {
-      background: var(--accent);
-      width: 24px;
-      border-radius: 4px;
-    }
-
-    /* CTA */
-    .cta {
-      width: 100%;
-      background: var(--black);
-      color: var(--white);
-      text-align: center;
-      padding: 6rem 0;
-    }
-
-    .cta h2 {
-      font-size: clamp(1.5rem, 3vw, 2.2rem);
-      margin-bottom: 1rem;
-      font-weight: 800;
-    }
-
-    .cta > p {
-      color: rgba(255,255,255,0.65);
-      margin-bottom: 2rem;
-      font-size: 1.1rem;
-    }
-
-    .phone-big {
-      display: inline-block;
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--accent);
-      text-decoration: none;
-      margin-bottom: 2rem;
-      transition: color 0.3s;
-      letter-spacing: 1px;
-    }
-
-    .phone-big:hover { color: #4aa8e8; }
-
-    /* Footer */
-    footer {
-      width: 100%;
-      text-align: center;
-      padding: 2.5rem 0;
-      color: var(--text-light);
-      font-size: 0.85rem;
-      border-top: 1px solid var(--border);
-      background: var(--white);
-    }
-
-    /* Fade-in */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(10,10,10,0.6);
-      backdrop-filter: blur(4px);
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .modal {
-      background: var(--white);
-      padding: 2.5rem;
-      border-radius: 8px;
-      max-width: 420px;
-      width: 90%;
-      transform: scale(0.9);
-      transition: transform 0.3s;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-      position: relative;
-    }
-
-    .modal-overlay.active .modal {
-      transform: scale(1);
-    }
-
-    .modal h3 {
-      font-size: 1.3rem;
-      margin-bottom: 1.5rem;
-      color: var(--black);
-      font-weight: 700;
-    }
-
-    .modal input {
-      width: 100%;
-      padding: 0.9rem 1rem;
-      margin-bottom: 1rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-size: 1rem;
-      font-family: inherit;
-      transition: border-color 0.3s;
-    }
-
-    .modal input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .modal .btn {
-      width: 100%;
-      margin-top: 0.5rem;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      width: 32px;
-      height: 32px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.5rem;
-      color: var(--text-light);
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-close:hover { color: var(--black); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360° Панорама производства</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Hero секция */
+        #hero {
+            position: relative;
+            height: 400vh; /* Достаточно высоты для прокрутки */
+        }
+        
+        /* Контейнер панорамы */
+        #panorama {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+        }
+        
+        /* UI оверлей */
+        #ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease, visibility 0.8s;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        #ui-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .content-box {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 3rem 2.5rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 540px;
+            width: 90%;
+            transform: translateY(60px) scale(0.9);
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        #ui-overlay.visible .content-box {
+            transform: translateY(0) scale(1);
+        }
+        
+        h1 {
+            font-size: 2.25rem;
+            margin-bottom: 1rem;
+            color: #1a1a2e;
+            line-height: 1.2;
+        }
+        
+        .subtitle {
+            font-size: 1.125rem;
+            color: #4a5568;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        /* Индикатор скролла */
+        .scroll-hint {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            color: white;
+            font-size: 0.875rem;
+            opacity: 0.8;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            animation: bounce 2s infinite;
+            pointer-events: none;
+        }
+        
+        .scroll-hint.hidden {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-12px); }
+            60% { transform: translateX(-50%) translateY(-6px); }
+        }
+        
+        .arrow {
+            width: 24px;
+            height: 24px;
+            border-right: 3px solid white;
+            border-bottom: 3px solid white;
+            transform: rotate(45deg);
+        }
+        
+        /* Основной контент */
+        #main-content {
+            position: relative;
+            z-index: 5;
+            background: white;
+            min-height: 100vh;
+            padding: 5rem 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: #1a1a2e;
+            margin-bottom: 1.5rem;
+        }
+        
+        p {
+            color: #4a5568;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+        }
+        
+        .section {
+            margin: 4rem 0;
+            padding: 3rem;
+            background: #f7fafc;
+            border-radius: 12px;
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            #hero {
+                height: 300vh;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .content-box {
+                padding: 2rem 1.5rem;
+            }
+            
+            .scroll-hint {
+                display: none; /* На мобильных скролл и так очевиден */
+            }
+        }
+        
+        /* Скрываем контролы Pannellum */
+        .pnlm-controls-container {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header id="header">
-    <div class="container">
-      <nav>
-        <a href="#" class="logo">МИТОРРА<span>.</span></a>
+    <section id="hero">
+        <div id="panorama"></div>
         
-        <ul class="nav-desktop">
-          <li><a href="#about">О системе</a></li>
-          <li><a href="#process">Как мы работаем</a></li>
-          <li><a href="#portfolio">Проекты</a></li>
-        </ul>
-
-        <div class="phone-wrap">
-          <a href="tel:+78007755695" class="phone-text">+7 800 775 56 95</a>
-          <button class="phone-btn" onclick="openModal()">Заказать звонок</button>
+        <div class="scroll-hint" id="scrollHint">
+            <span>Листайте вниз</span>
+            <div class="arrow"></div>
         </div>
-
-        <button class="burger" id="burger" aria-label="Меню">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Mobile Menu -->
-  <div class="mobile-menu" id="mobileMenu">
-    <ul>
-      <li><a href="#about" onclick="closeMenu()">О системе</a></li>
-      <li><a href="#process" onclick="closeMenu()">Как мы работаем</a></li>
-      <li><a href="#portfolio" onclick="closeMenu()">Проекты</a></li>
-    </ul>
-    <div class="mobile-phone">
-      <a href="tel:+78007755695">+7 800 775 56 95</a>
-      <button onclick="openModal(); closeMenu();">Заказать звонок</button>
-    </div>
-  </div>
-
-  <!-- Hero -->
-  <section class="hero">
-    <video class="hero-video" autoplay muted loop playsinline preload="auto">
-      <source src="bg_video.mp4" type="video/mp4">
-    </video>
-    
-    <div class="hero-overlay"></div>
-    
-    <div class="hero-content">
-      <h1>Монтаж и установка<br>принудительной вентиляции</h1>
-      <p>Проектирование, поставка оборудования и пусконаладка. Бесплатный выезд инженера на объект.</p>
-      <button class="btn" onclick="openModal()">Оставить заявку</button>
-    </div>
-
-    <div class="scroll-indicator">
-      <span>Листайте</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-    </div>
-  </section>
-
-  <!-- About -->
-  <section id="about" class="section-full">
-    <div class="container">
-      <h2 class="section-title">Почему принудительная вентиляция</h2>
-      <div class="features-grid">
-        <div class="feature-card fade-in">
-          <h3>Назначение</h3>
-          <p>Постоянный приток свежего воздуха, защита от плесени, контроль влажности и соответствие санитарным нормам.</p>
-        </div>
-        <div class="feature-card fade-in">
-          <h3>Проблема естественной вентиляции</h3>
-          <p>Теплопотери, нестабильный воздухообмен, отсутствие фильтрации и контроля CO₂.</p>
-        </div>
-        <div class="feature-card fade-in">
-          <h3>Преимущества системы</h3>
-          <p>Фильтрация примесей, регулировка температуры и влажности, снижение энергопотерь.</p>
-        </div>
-        <div class="feature-card fade-in">
-          <h3>Комплексный подход</h3>
-          <p>От проектирования и подбора оборудования до монтажа, запуска и сервисного обслуживания.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Process Infographic -->
-  <section id="process" class="section-full process-section">
-    <div class="container">
-      <h2 class="section-title">Как мы работаем</h2>
-      <div class="process-infographic" id="processInfographic">
-        <div class="process-line">
-          <div class="process-line-fill" id="processLineFill"></div>
-        </div>
-        <div class="process-steps">
-          <div class="step" data-delay="0">
-            <div class="step-circle">01</div>
-            <div>
-              <h3>Заявка</h3>
-              <p>Звонок или форма на сайте</p>
+        
+        <div id="ui-overlay">
+            <div class="content-box">
+                <h1>Вентиляционные системы нового поколения</h1>
+                <p class="subtitle">
+                    Современные промышленные решения на крыше нашего производственного комплекса. 
+                    Эффективность, надежность, инновации.
+                </p>
+                <a href="#main-content" class="cta-button" id="ctaButton">
+                    Узнать больше
+                </a>
             </div>
-          </div>
-          <div class="step" data-delay="100">
-            <div class="step-circle">02</div>
-            <div>
-              <h3>Выезд</h3>
-              <p>Бесплатный аудит объекта</p>
-            </div>
-          </div>
-          <div class="step" data-delay="200">
-            <div class="step-circle">03</div>
-            <div>
-              <h3>Смета</h3>
-              <p>Расчёт и отправка на почту</p>
-            </div>
-          </div>
-          <div class="step" data-delay="300">
-            <div class="step-circle">04</div>
-            <div>
-              <h3>Договор</h3>
-              <p>Фиксация сроков и цены</p>
-            </div>
-          </div>
-          <div class="step" data-delay="400">
-            <div class="step-circle">05</div>
-            <div>
-              <h3>Монтаж</h3>
-              <p>Поставка, установка, проверка</p>
-            </div>
-          </div>
-          <div class="step" data-delay="500">
-            <div class="step-circle">06</div>
-            <div>
-              <h3>Сдача</h3>
-              <p>Приём работы и гарантия</p>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Portfolio Carousel -->
-  <section id="portfolio" class="section-full portfolio-section">
-    <div class="container">
-      <h2 class="section-title">Реализованные проекты</h2>
-    </div>
-    
-    <div class="carousel-wrapper" id="carouselWrapper">
-      <div class="carousel-track" id="carouselTrack">
-        <div class="carousel-slide">
-          <div class="portfolio-item">
-            <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&q=80" alt="Проект 1">
-            <div class="portfolio-overlay">
-              <h3>Система удаления выхлопных газов</h3>
-              <p>ООО «Глобал Трак Сервис Северо-Запад»</p>
-              <div class="portfolio-meta">
-                <span class="tag">Проектирование</span>
-                <span class="tag">Монтаж</span>
-                <span class="tag">Пусконаладка</span>
-              </div>
+    <main id="main-content">
+        <div class="container">
+            <h2>О нашем производстве</h2>
+            <p>
+                Мы специализируемся на разработке и установке промышленных вентиляционных систем. 
+                Наш завод оснащен современным оборудованием для производства компонентов любой сложности.
+            </p>
+            
+            <div class="section">
+                <h3>Технологии</h3>
+                <p>
+                    Используем передовые материалы и технологии для обеспечения максимальной 
+                    эффективности систем вентиляции и кондиционирования.
+                </p>
             </div>
-          </div>
-        </div>
-        <div class="carousel-slide">
-          <div class="portfolio-item">
-            <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=80" alt="Проект 2">
-            <div class="portfolio-overlay">
-              <h3>Приточно-вытяжная система 18 900 м³/ч</h3>
-              <p>Ремонтная зона, Ленинградская область</p>
-              <div class="portfolio-meta">
-                <span class="tag">Воздуховоды</span>
-                <span class="tag">КИПиА</span>
-              </div>
+            
+            <div class="section">
+                <h3>Проекты</h3>
+                <p>
+                    Реализовали более 500 проектов различной сложности — от небольших офисных 
+                    помещений до крупных промышленных объектов.
+                </p>
             </div>
-          </div>
-        </div>
-        <div class="carousel-slide">
-          <div class="portfolio-item">
-            <img src="https://images.unsplash.com/photo-1565514020176-db9bb939f7eb?w=800&q=80" alt="Проект 3">
-            <div class="portfolio-overlay">
-              <h3>Вентиляция производственного цеха</h3>
-              <p>Московская область, 12 000 м³/ч</p>
-              <div class="portfolio-meta">
-                <span class="tag">Приток</span>
-                <span class="tag">Вытяжка</span>
-              </div>
+            
+            <div class="section">
+                <h3>Контакты</h3>
+                <p>
+                    Готовы обсудить ваш проект? Свяжитесь с нами для консультации и расчета 
+                    стоимости оборудования.
+                </p>
             </div>
-          </div>
+            
+            <div style="height: 100vh;"></div> <!-- Для демонстрации скролла -->
         </div>
-        <div class="carousel-slide">
-          <div class="portfolio-item">
-            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80" alt="Проект 4">
-            <div class="portfolio-overlay">
-              <h3>Монтаж в торговом центре</h3>
-              <p>Санкт-Петербург, приточная установка</p>
-              <div class="portfolio-meta">
-                <span class="tag">Дизайн</span>
-                <span class="tag">Монтаж</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="carousel-slide">
-          <div class="portfolio-item">
-            <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&q=80" alt="Проект 5">
-            <div class="portfolio-overlay">
-              <h3>Система вентиляции склада</h3>
-              <p>Логистический парк, 45 000 м³/ч</p>
-              <div class="portfolio-meta">
-                <span class="tag">Автоматика</span>
-                <span class="tag">Сервис</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="carousel-slide">
-          <div class="portfolio-item">
-            <img src="https://images.unsplash.com/photo-1513828583688-c52646db42da?w=800&q=80" alt="Проект 6">
-            <div class="portfolio-overlay">
-              <h3>Обслуживание ИТП жилого комплекса</h3>
-              <p>Регулярное ТО и замена фильтров</p>
-              <div class="portfolio-meta">
-                <span class="tag">Обслуживание</span>
-                <span class="tag">Фильтрация</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </main>
 
-    <div class="carousel-controls">
-      <button class="carousel-btn" id="prevBtn" aria-label="Назад">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </button>
-      <div class="carousel-dots" id="carouselDots"></div>
-      <button class="carousel-btn" id="nextBtn" aria-label="Вперёд">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
-    </div>
-  </section>
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <script>
+        // Инициализация Pannellum
+        const viewer = pannellum.viewer('panorama', {
+            "type": "equirectangular",
+            "panorama": "panorama.jpg", // Замените на свой файл или URL
+            "autoLoad": true,
+            "showControls": false,
+            "draggable": false,
+            "scrollZoom": false,
+            "keyboardZoom": false,
+            "mouseZoom": false,
+            "doubleClickZoom": false,
+            "yaw": 0,
+            "pitch": 0,
+            "hfov": 100
+        });
 
-  <!-- CTA -->
-  <section id="cta" class="cta">
-    <div class="container">
-      <h2>Готовы улучшить микроклимат?</h2>
-      <p>Бесплатная консультация и выезд инженера. Свяжемся в течение часа.</p>
-      <a href="tel:+78007755695" class="phone-big">+7 800 775 56 95</a>
-      <br>
-      <button class="btn" onclick="openModal()">Оставить заявку</button>
-    </div>
-  </section>
+        // Конфигурация
+        const config = {
+            totalRotation: 360,        // Полный оборот
+            uiTriggerProgress: 0.65,   // На 65% скролла показываем UI
+            heroHeightMultiplier: 4    // hero = 400vh (4 экрана)
+        };
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      © 2026 Миторра. Строительство. Монтаж принудительной вентиляции.
-    </div>
-  </footer>
+        let uiShown = false;
+        let isMobile = window.matchMedia('(pointer: coarse)').matches;
 
-  <!-- Modal -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-      <h3>Оставить заявку</h3>
-      <form onsubmit="event.preventDefault(); alert('Заявка отправлена!'); closeModal();">
-        <input type="text" placeholder="Ваше имя" required>
-        <input type="tel" placeholder="Телефон" required>
-        <button type="submit" class="btn">Отправить</button>
-      </form>
-    </div>
-  </div>
+        const elements = {
+            hero: document.getElementById('hero'),
+            ui: document.getElementById('ui-overlay'),
+            scrollHint: document.getElementById('scrollHint'),
+            ctaButton: document.getElementById('ctaButton')
+        };
 
-  <script>
-    /* --- Header scroll --- */
-    const header = document.getElementById('header');
-    window.addEventListener('scroll', () => {
-      header.classList.toggle('scrolled', window.scrollY > 60);
-    });
-
-    /* --- Burger --- */
-    const burger = document.getElementById('burger');
-    const mobileMenu = document.getElementById('mobileMenu');
-    burger.addEventListener('click', () => {
-      burger.classList.toggle('active');
-      mobileMenu.classList.toggle('open');
-    });
-    function closeMenu() {
-      burger.classList.remove('active');
-      mobileMenu.classList.remove('open');
-    }
-
-    /* --- Video force play --- */
-    const heroVideo = document.querySelector('.hero-video');
-    if (heroVideo) {
-      heroVideo.play().catch(() => {
-        // Autoplay blocked or file missing — background image will show
-      });
-    }
-
-    /* --- Fade In --- */
-    const fadeObserver = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
-
-    /* --- Process --- */
-    const processInfographic = document.getElementById('processInfographic');
-    const processLineFill = document.getElementById('processLineFill');
-    const steps = document.querySelectorAll('.step');
-    const processObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const isMobile = window.innerWidth <= 768;
-          processLineFill.style.width = isMobile ? '100%' : '100%';
-          processLineFill.style.height = isMobile ? '100%' : '100%';
-          steps.forEach((step, i) => {
-            setTimeout(() => step.classList.add('visible'), parseInt(step.dataset.delay) || (i * 100));
-          });
-          processObserver.unobserve(entry.target);
+        // Основная функция обновления
+        function handleScroll() {
+            const heroRect = elements.hero.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            
+            // Прогресс скролла в hero секции (0 to 1)
+            let progress = -heroRect.top / (elements.hero.offsetHeight - windowHeight);
+            progress = Math.max(0, Math.min(1, progress));
+            
+            // Вращение панорамы
+            const yaw = progress * config.totalRotation;
+            viewer.setYaw(yaw);
+            
+            // Показ/скрытие UI
+            if (progress >= config.uiTriggerProgress && !uiShown) {
+                showUI();
+            } else if (progress < config.uiTriggerProgress && uiShown) {
+                hideUI();
+            }
         }
-      });
-    }, { threshold: 0.3 });
-    processObserver.observe(processInfographic);
 
-    /* --- Carousel --- */
-    const track = document.getElementById('carouselTrack');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const dotsContainer = document.getElementById('carouselDots');
-    let currentIndex = 0;
+        function showUI() {
+            elements.ui.classList.add('visible');
+            elements.scrollHint.classList.add('hidden');
+            uiShown = true;
+        }
 
-    function getSlidesPerView() {
-      if (window.innerWidth <= 768) return 1;
-      if (window.innerWidth <= 1024) return 2;
-      return 3;
-    }
+        function hideUI() {
+            elements.ui.classList.remove('visible');
+            elements.scrollHint.classList.remove('hidden');
+            uiShown = false;
+        }
 
-    function getMaxIndex() {
-      return Math.max(0, 6 - getSlidesPerView());
-    }
+        // Оптимизация скролла
+        let ticking = false;
+        function requestUpdate() {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    handleScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
 
-    function createDots() {
-      dotsContainer.innerHTML = '';
-      const max = getMaxIndex();
-      for (let i = 0; i <= max; i++) {
-        const dot = document.createElement('button');
-        dot.className = 'dot' + (i === currentIndex ? ' active' : '');
-        dot.setAttribute('aria-label', 'Слайд ' + (i + 1));
-        dot.onclick = () => { currentIndex = i; updateCarousel(); };
-        dotsContainer.appendChild(dot);
-      }
-    }
+        // Для мобильных — упрощенная версия (только тач-свайпы)
+        if (isMobile) {
+            viewer.setDraggable(true);
+            elements.scrollHint.style.display = 'none';
+            
+            // Показываем UI после первого взаимодействия
+            viewer.on('mousedown', function() {
+                if (!uiShown) {
+                    setTimeout(showUI, 500);
+                }
+            });
+        } else {
+            window.addEventListener('scroll', requestUpdate, { passive: true });
+        }
 
-    function updateCarousel() {
-      const spv = getSlidesPerView();
-      const max = getMaxIndex();
-      if (currentIndex > max) currentIndex = max;
-      track.style.transform = `translateX(-${currentIndex * (100 / spv)}%)`;
-      prevBtn.disabled = currentIndex === 0;
-      nextBtn.disabled = currentIndex >= max;
-      createDots();
-    }
+        // Плавный скролл к контенту
+        elements.ctaButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('main-content').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        });
 
-    prevBtn.addEventListener('click', () => { if (currentIndex > 0) { currentIndex--; updateCarousel(); }});
-    nextBtn.addEventListener('click', () => { if (currentIndex < getMaxIndex()) { currentIndex++; updateCarousel(); }});
+        // Инициализация
+        handleScroll();
 
-    let touchStartX = 0;
-    track.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-    track.addEventListener('touchend', e => {
-      const diff = touchStartX - e.changedTouches[0].screenX;
-      if (Math.abs(diff) > 50) {
-        if (diff > 0 && currentIndex < getMaxIndex()) currentIndex++;
-        else if (diff < 0 && currentIndex > 0) currentIndex--;
-        updateCarousel();
-      }
-    }, { passive: true });
-
-    window.addEventListener('resize', updateCarousel);
-    createDots();
-    updateCarousel();
-
-    /* --- Modal --- */
-    const modalOverlay = document.getElementById('modalOverlay');
-    function openModal() { modalOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closeModal() { modalOverlay.classList.remove('active'); document.body.style.overflow = ''; }
-    function closeModalOutside(e) { if (e.target === modalOverlay) closeModal(); }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-  </script>
-
+        // Обработка изменения размера
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleScroll, 250);
+        });
+    </script>
 </body>
 </html>
