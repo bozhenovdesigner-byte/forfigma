@@ -24,7 +24,7 @@
             z-index: 1;
         }
 
-        /* UI Overlay */
+        /* UI Overlay - теперь уезжает наверх */
         #ui-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -33,12 +33,17 @@
             pointer-events: none;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.5s ease, visibility 0.5s;
+            transform: translateY(0);
+            transition: opacity 0.4s ease, visibility 0.4s, transform 0.4s ease;
         }
         #ui-overlay.visible {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
+        }
+        #ui-overlay.scrolling-up {
+            transform: translateY(-100vh);
+            opacity: 0;
         }
 
         .gradient {
@@ -145,11 +150,11 @@
             background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
         }
 
-        /* Block 2 - ВАЖНО: перекрывает панораму */
+        /* Block 2 */
         #block2 {
             position: relative;
-            z-index: 15; /* Выше чем panorama (z-index: 1) и ui-overlay (z-index: 10) */
-            background: #ffffff; /* Явный белый фон */
+            z-index: 5; /* Ниже чем ui-overlay (10) */
+            background: #ffffff;
             min-height: 100vh;
             padding: 8rem 2rem;
         }
@@ -194,7 +199,7 @@
                 <h1>Вентиляционные системы нового поколения</h1>
                 <p class="subtitle">Энергоэффективные, умные и полностью адаптируемые под задачи производства</p>
                 <div class="cta-group">
-                    <a href="#block2" class="btn btn-primary">Узнать больше</a>
+                    <a href="#block2" class="btn btn-primary" id="ctaButton">Узнать больше</a>
                     <a href="#contact" class="btn btn-ghost">Запросить расчет</a>
                 </div>
             </div>
@@ -239,14 +244,15 @@
 
         // Конфигурация
         const CONFIG = {
-            uiTriggerProgress: 0.50, // 50% скролла hero = UI появляется
-            totalYaw: 270,           // Всего крутим на 270°
-            smoothing: 0.12          // Плавность (0.1-0.15 оптимально)
+            uiShowProgress: 0.50,    // 50% — показываем UI
+            uiHideProgress: 0.85,    // 85% — начинаем скрывать UI (уезжает наверх)
+            totalYaw: 270            // Всего крутим на 270°
         };
 
         let currentYaw = 0;
         let targetYaw = 0;
-        let uiShown = false;
+        let lastScrollTop = 0;
+        let uiState = 'hidden'; // 'hidden', 'visible', 'scrolling-up'
 
         const els = {
             hero: document.getElementById('hero'),
@@ -255,17 +261,20 @@
             block2: document.getElementById('block2')
         };
 
-        // Анимационный цикл - только догоняет targetYaw, не крутит сам!
-        function animate() {
+        // Обновление позиции панорамы (без анимационного цикла!)
+        function updatePanorama() {
+            // Плавное приближение (lerp)
             const delta = targetYaw - currentYaw;
-            // Если разница маленькая (< 0.01), не крутим
-            if (Math.abs(delta) > 0.01) {
-                currentYaw += delta * CONFIG.smoothing;
+            if (Math.abs(delta) > 0.05) {
+                currentYaw += delta * 0.1;
+                viewer.setYaw(currentYaw);
+                // Продолжаем обновлять пока не догнали
+                requestAnimationFrame(updatePanorama);
+            } else {
+                currentYaw = targetYaw;
                 viewer.setYaw(currentYaw);
             }
-            requestAnimationFrame(animate);
         }
-        animate();
 
         // Обработка скролла
         function onScroll() {
@@ -277,28 +286,43 @@
             let progress = -heroRect.top / (heroHeight - windowHeight);
             progress = Math.max(0, Math.min(1, progress));
 
-            // === ВАЖНО: targetYaw считаем напрямую от progress ===
-            if (progress < CONFIG.uiTriggerProgress) {
+            // === Расчет угла поворота ===
+            if (progress < CONFIG.uiShowProgress) {
                 // 0% - 50%: 0° → 180°
-                const localProgress = progress / CONFIG.uiTriggerProgress;
+                const localProgress = progress / CONFIG.uiShowProgress;
                 targetYaw = localProgress * 180;
             } else {
                 // 50% - 100%: 180° → 270°
-                const localProgress = (progress - CONFIG.uiTriggerProgress) / (1 - CONFIG.uiTriggerProgress);
+                const localProgress = (progress - CONFIG.uiShowProgress) / (1 - CONFIG.uiShowProgress);
                 targetYaw = 180 + (localProgress * 90);
             }
 
-            // === ВАЖНО: UI показываем по progress, а не по currentYaw ===
-            if (progress >= CONFIG.uiTriggerProgress && !uiShown) {
-                els.ui.classList.add('visible');
-                els.indicator.classList.add('hidden');
-                uiShown = true;
-            } else if (progress < CONFIG.uiTriggerProgress - 0.02 && uiShown) {
-                // -0.02 небольшой гистерезис чтобы не мерцало
-                els.ui.classList.remove('visible');
-                els.indicator.classList.remove('hidden');
-                uiShown = false;
+            // === Управление UI ===
+            if (progress >= CONFIG.uiShowProgress && progress < CONFIG.uiHideProgress) {
+                // Показываем UI
+                if (uiState !== 'visible') {
+                    els.ui.classList.remove('scrolling-up');
+                    els.ui.classList.add('visible');
+                    els.indicator.classList.add('hidden');
+                    uiState = 'visible';
+                }
+            } else if (progress >= CONFIG.uiHideProgress) {
+                // UI уезжает наверх
+                if (uiState !== 'scrolling-up') {
+                    els.ui.classList.add('scrolling-up');
+                    uiState = 'scrolling-up';
+                }
+            } else {
+                // UI скрыт (начало скролла)
+                if (uiState !== 'hidden') {
+                    els.ui.classList.remove('visible', 'scrolling-up');
+                    els.indicator.classList.remove('hidden');
+                    uiState = 'hidden';
+                }
             }
+
+            // Запускаем обновление панорамы
+            updatePanorama();
         }
 
         // Оптимизация скролла
@@ -313,12 +337,10 @@
             }
         }, { passive: true });
 
-        // Кнопки
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                els.block2.scrollIntoView({ behavior: 'smooth' });
-            });
+        // Кнопка CTA
+        document.getElementById('ctaButton').addEventListener('click', (e) => {
+            e.preventDefault();
+            els.block2.scrollIntoView({ behavior: 'smooth' });
         });
 
         // Ресайз
