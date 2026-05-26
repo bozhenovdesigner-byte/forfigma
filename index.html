@@ -15,7 +15,7 @@
 
         #hero {
             position: relative;
-            height: 450vh; /* Увеличил высоту для комфортного скролла */
+            height: 400vh;
         }
         #panorama {
             position: fixed;
@@ -33,7 +33,7 @@
             pointer-events: none;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.6s ease, visibility 0.6s;
+            transition: opacity 0.5s ease, visibility 0.5s;
         }
         #ui-overlay.visible {
             opacity: 1;
@@ -41,7 +41,6 @@
             pointer-events: auto;
         }
 
-        /* Градиент снизу для читаемости */
         .gradient {
             position: absolute;
             bottom: 0; left: 0;
@@ -116,7 +115,6 @@
             background: rgba(255,255,255,0.08);
         }
 
-        /* Scroll indicator */
         .scroll-indicator {
             position: fixed;
             bottom: 2.5rem;
@@ -147,11 +145,11 @@
             background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
         }
 
-        /* Block 2 */
+        /* Block 2 - ВАЖНО: перекрывает панораму */
         #block2 {
             position: relative;
-            z-index: 5;
-            background: #fff;
+            z-index: 15; /* Выше чем panorama (z-index: 1) и ui-overlay (z-index: 10) */
+            background: #ffffff; /* Явный белый фон */
             min-height: 100vh;
             padding: 8rem 2rem;
         }
@@ -168,7 +166,7 @@
         .spacer { height: 100vh; }
 
         @media (max-width: 768px) {
-            #hero { height: 400vh; }
+            #hero { height: 350vh; }
             .content { padding: 0 6% 12vh; }
             h1 { font-size: 1.9rem; }
             .subtitle { font-size: 1rem; }
@@ -239,11 +237,11 @@
             hfov: 100
         });
 
-        // === КОНФИГУРАЦИЯ ===
+        // Конфигурация
         const CONFIG = {
-            yawAtUI: 180,        // На каком угле появляется UI
-            yawEnd: 270,         // Конечный угол (180 + 90 на чтение)
-            smoothing: 0.1       // Плавность (меньше = плавнее)
+            uiTriggerProgress: 0.50, // 50% скролла hero = UI появляется
+            totalYaw: 270,           // Всего крутим на 270°
+            smoothing: 0.12          // Плавность (0.1-0.15 оптимально)
         };
 
         let currentYaw = 0;
@@ -253,15 +251,18 @@
         const els = {
             hero: document.getElementById('hero'),
             ui: document.getElementById('ui-overlay'),
-            indicator: document.getElementById('scrollIndicator')
+            indicator: document.getElementById('scrollIndicator'),
+            block2: document.getElementById('block2')
         };
 
-        // Анимационный цикл
+        // Анимационный цикл - только догоняет targetYaw, не крутит сам!
         function animate() {
-            // Плавное приближение к целевому углу
             const delta = targetYaw - currentYaw;
-            currentYaw += delta * CONFIG.smoothing;
-            viewer.setYaw(currentYaw);
+            // Если разница маленькая (< 0.01), не крутим
+            if (Math.abs(delta) > 0.01) {
+                currentYaw += delta * CONFIG.smoothing;
+                viewer.setYaw(currentYaw);
+            }
             requestAnimationFrame(animate);
         }
         animate();
@@ -272,31 +273,28 @@
             const heroHeight = els.hero.offsetHeight;
             const windowHeight = window.innerHeight;
             
-            // Прогресс скролла в hero (0 to 1)
+            // Прогресс скролла (0 to 1)
             let progress = -heroRect.top / (heroHeight - windowHeight);
             progress = Math.max(0, Math.min(1, progress));
 
-            // === ЛОГИКА ===
-            // 0% - 50% скролла: 0° → 180°
-            // 50%: UI появляется
-            // 50% - 100%: 180° → 270° (чтение)
-            
-            if (progress < 0.5) {
-                // Первая половина: крутим до 180°
-                const localProgress = progress / 0.5; // 0 to 1
-                targetYaw = localProgress * CONFIG.yawAtUI;
+            // === ВАЖНО: targetYaw считаем напрямую от progress ===
+            if (progress < CONFIG.uiTriggerProgress) {
+                // 0% - 50%: 0° → 180°
+                const localProgress = progress / CONFIG.uiTriggerProgress;
+                targetYaw = localProgress * 180;
             } else {
-                // Вторая половина: 180° → 270°
-                const localProgress = (progress - 0.5) / 0.5; // 0 to 1
-                targetYaw = CONFIG.yawAtUI + (localProgress * 90);
+                // 50% - 100%: 180° → 270°
+                const localProgress = (progress - CONFIG.uiTriggerProgress) / (1 - CONFIG.uiTriggerProgress);
+                targetYaw = 180 + (localProgress * 90);
             }
 
-            // Показ UI ТОЛЬКО после 180°
-            if (currentYaw >= CONFIG.yawAtUI - 5 && !uiShown) { // -5 для небольшого допуска
+            // === ВАЖНО: UI показываем по progress, а не по currentYaw ===
+            if (progress >= CONFIG.uiTriggerProgress && !uiShown) {
                 els.ui.classList.add('visible');
                 els.indicator.classList.add('hidden');
                 uiShown = true;
-            } else if (currentYaw < CONFIG.yawAtUI - 10 && uiShown) {
+            } else if (progress < CONFIG.uiTriggerProgress - 0.02 && uiShown) {
+                // -0.02 небольшой гистерезис чтобы не мерцало
                 els.ui.classList.remove('visible');
                 els.indicator.classList.remove('hidden');
                 uiShown = false;
@@ -319,9 +317,7 @@
         document.querySelectorAll('.btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                document.getElementById('block2').scrollIntoView({ 
-                    behavior: 'smooth' 
-                });
+                els.block2.scrollIntoView({ behavior: 'smooth' });
             });
         });
 
