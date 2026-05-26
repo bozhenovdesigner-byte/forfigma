@@ -24,7 +24,7 @@
             z-index: 1;
         }
 
-        /* UI Overlay - теперь уезжает наверх */
+        /* UI Overlay */
         #ui-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -34,7 +34,7 @@
             opacity: 0;
             visibility: hidden;
             transform: translateY(0);
-            transition: opacity 0.4s ease, visibility 0.4s, transform 0.4s ease;
+            transition: opacity 0.5s ease, visibility 0.5s, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         #ui-overlay.visible {
             opacity: 1;
@@ -153,7 +153,7 @@
         /* Block 2 */
         #block2 {
             position: relative;
-            z-index: 5; /* Ниже чем ui-overlay (10) */
+            z-index: 5;
             background: #ffffff;
             min-height: 100vh;
             padding: 8rem 2rem;
@@ -242,16 +242,15 @@
             hfov: 100
         });
 
-        // Конфигурация
+        // === КОНФИГУРАЦИЯ ===
         const CONFIG = {
-            uiShowProgress: 0.50,    // 50% — показываем UI
-            uiHideProgress: 0.85,    // 85% — начинаем скрывать UI (уезжает наверх)
-            totalYaw: 270            // Всего крутим на 270°
+            uiShowProgress: 0.40,    // 40% — показываем UI (раньше было 50%)
+            uiHideProgress: 0.92,    // 92% — UI уезжает (синхронно с блоком 2)
+            totalYaw: 270
         };
 
         let currentYaw = 0;
         let targetYaw = 0;
-        let lastScrollTop = 0;
         let uiState = 'hidden'; // 'hidden', 'visible', 'scrolling-up'
 
         const els = {
@@ -261,14 +260,12 @@
             block2: document.getElementById('block2')
         };
 
-        // Обновление позиции панорамы (без анимационного цикла!)
+        // Обновление позиции панорамы
         function updatePanorama() {
-            // Плавное приближение (lerp)
             const delta = targetYaw - currentYaw;
             if (Math.abs(delta) > 0.05) {
                 currentYaw += delta * 0.1;
                 viewer.setYaw(currentYaw);
-                // Продолжаем обновлять пока не догнали
                 requestAnimationFrame(updatePanorama);
             } else {
                 currentYaw = targetYaw;
@@ -282,22 +279,21 @@
             const heroHeight = els.hero.offsetHeight;
             const windowHeight = window.innerHeight;
             
-            // Прогресс скролла (0 to 1)
             let progress = -heroRect.top / (heroHeight - windowHeight);
             progress = Math.max(0, Math.min(1, progress));
 
             // === Расчет угла поворота ===
             if (progress < CONFIG.uiShowProgress) {
-                // 0% - 50%: 0° → 180°
+                // 0% - 40%: 0° → 180°
                 const localProgress = progress / CONFIG.uiShowProgress;
                 targetYaw = localProgress * 180;
             } else {
-                // 50% - 100%: 180° → 270°
+                // 40% - 100%: 180° → 270°
                 const localProgress = (progress - CONFIG.uiShowProgress) / (1 - CONFIG.uiShowProgress);
                 targetYaw = 180 + (localProgress * 90);
             }
 
-            // === Управление UI ===
+            // === Управление UI (синхронизировано с блоком 2) ===
             if (progress >= CONFIG.uiShowProgress && progress < CONFIG.uiHideProgress) {
                 // Показываем UI
                 if (uiState !== 'visible') {
@@ -307,7 +303,7 @@
                     uiState = 'visible';
                 }
             } else if (progress >= CONFIG.uiHideProgress) {
-                // UI уезжает наверх
+                // UI уезжает наверх (когда блок 2 уже виден)
                 if (uiState !== 'scrolling-up') {
                     els.ui.classList.add('scrolling-up');
                     uiState = 'scrolling-up';
@@ -321,7 +317,6 @@
                 }
             }
 
-            // Запускаем обновление панорамы
             updatePanorama();
         }
 
